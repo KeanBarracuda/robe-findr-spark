@@ -1,5 +1,5 @@
 // Pure logic ported 1:1 from the Python source: matches_method() + helpers.
-import { FIRST_NAME_TOKENS } from "./rfinder-data";
+import { FIRST_NAME_TOKENS, YEAR_ID_RANGES } from "./rfinder-data";
 
 const isDigit = (ch: string) => ch >= "0" && ch <= "9";
 const isAlpha = (ch: string) => /^[a-zA-Z]$/.test(ch);
@@ -160,9 +160,7 @@ export function usernameMatchesMethod(
 }
 
 export function randomIdForYear(year: string): number {
-  const range = (year in (require("./rfinder-data").YEAR_ID_RANGES))
-    ? require("./rfinder-data").YEAR_ID_RANGES[year]
-    : require("./rfinder-data").YEAR_ID_RANGES["Any year"];
-  const [lo, hi] = range as [number, number];
+  const range = YEAR_ID_RANGES[year] ?? YEAR_ID_RANGES["Any year"];
+  const [lo, hi] = range;
   return Math.floor(Math.random() * (hi - lo + 1)) + lo;
 }
