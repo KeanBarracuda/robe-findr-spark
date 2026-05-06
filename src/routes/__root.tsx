@@ -35,13 +35,19 @@ export const Route = createRootRoute({
         content:
           "rFinder v1.0.1 — scan random Roblox accounts by year & method, filter by RAP, hats, and badges, and look up any username.",
       },
-      { property: "og:title", content: "rFinder v1.0.1" },
+      { property: "og:title", content: "rFinder v1.0.1 — Roblox account scanner & lookup" },
       {
         property: "og:description",
         content: "Scan and look up Roblox accounts with deep filtering.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "rFinder v1.0.1 — Roblox account scanner & lookup" },
+      { name: "description", content: "rFinder v1.0.1 scans Roblox accounts for available usernames and looks up user details." },
+      { property: "og:description", content: "rFinder v1.0.1 scans Roblox accounts for available usernames and looks up user details." },
+      { name: "twitter:description", content: "rFinder v1.0.1 scans Roblox accounts for available usernames and looks up user details." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/01384a72-e3b3-4231-b775-6fb2aa859b5f/id-preview-a13cf460--4fb35f9a-418d-4592-b0d3-289aa5b56795.lovable.app-1776878154104.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/01384a72-e3b3-4231-b775-6fb2aa859b5f/id-preview-a13cf460--4fb35f9a-418d-4592-b0d3-289aa5b56795.lovable.app-1776878154104.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
