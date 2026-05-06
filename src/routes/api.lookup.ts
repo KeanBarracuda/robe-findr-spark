@@ -1,3 +1,4 @@
+import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { BADGE_ICON_URLS, type LookupResponse } from "@/lib/rfinder-data";
 import {
