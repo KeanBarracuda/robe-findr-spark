@@ -52,7 +52,8 @@ function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {tab === "scanner" ? <Scanner /> : <Lookup />}
+        <div hidden={tab !== "scanner"}><Scanner /></div>
+        <div hidden={tab !== "lookup"}><Lookup /></div>
       </main>
 
       {/* Mobile bottom tab bar */}
