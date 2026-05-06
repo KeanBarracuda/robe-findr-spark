@@ -1,6 +1,6 @@
 // Shared constants for rFinder (isomorphic — safe on client & server)
 
-export const TOOL_VERSION = "rFinder v1.0.1";
+export const TOOL_VERSION = "Barracuda Finder";
 export const DISCORD_URL = "https://discord.gg/yRtzFENhbt";
 
 export const YEAR_ID_RANGES: Record<string, [number, number]> = {
