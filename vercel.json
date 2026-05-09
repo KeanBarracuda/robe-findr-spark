@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "vite build",
   "outputDirectory": "dist/client",
+  "functions": {
+    "api/lookup.js": { "runtime": "edge" },
+    "api/scan.js": { "runtime": "edge" }
+  },
   "rewrites": [
     {
       "source": "/((?!api/.*).*)",

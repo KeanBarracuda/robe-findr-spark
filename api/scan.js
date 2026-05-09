@@ -16,6 +16,7 @@ import {
 } from "./_shared.js";
 
 export const config = { runtime: "edge" };
+export const runtime = "edge";
 
 async function scanOne(uid, req) {
   const user = await getUser(uid);
