@@ -10,53 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiScanRouteImport } from './routes/api.scan'
-import { Route as ApiLookupRouteImport } from './routes/api.lookup'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiScanRoute = ApiScanRouteImport.update({
-  id: '/api/scan',
-  path: '/api/scan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiLookupRoute = ApiLookupRouteImport.update({
-  id: '/api/lookup',
-  path: '/api/lookup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/lookup': typeof ApiLookupRoute
-  '/api/scan': typeof ApiScanRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/lookup': typeof ApiLookupRoute
-  '/api/scan': typeof ApiScanRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/lookup': typeof ApiLookupRoute
-  '/api/scan': typeof ApiScanRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/lookup' | '/api/scan'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/lookup' | '/api/scan'
-  id: '__root__' | '/' | '/api/lookup' | '/api/scan'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiLookupRoute: typeof ApiLookupRoute
-  ApiScanRoute: typeof ApiScanRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,27 +48,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/scan': {
-      id: '/api/scan'
-      path: '/api/scan'
-      fullPath: '/api/scan'
-      preLoaderRoute: typeof ApiScanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/lookup': {
-      id: '/api/lookup'
-      path: '/api/lookup'
-      fullPath: '/api/lookup'
-      preLoaderRoute: typeof ApiLookupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiLookupRoute: ApiLookupRoute,
-  ApiScanRoute: ApiScanRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
