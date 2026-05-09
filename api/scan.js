@@ -15,9 +15,6 @@ import {
   yearIntFromCreated,
 } from "./_shared.js";
 
-export const config = { runtime: "edge" };
-export const runtime = "edge";
-
 async function scanOne(uid, req) {
   const user = await getUser(uid);
   if (!user) return null;
@@ -102,7 +99,11 @@ function sortResults(arr, sort) {
   return sorted;
 }
 
-export default async function handler(request) {
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: cors });
+}
+
+export async function POST(request) {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
@@ -125,4 +126,8 @@ export default async function handler(request) {
     matched: results.length,
     elapsed_seconds: (Date.now() - start) / 1000,
   });
+}
+
+export default async function handler(request) {
+  return POST(request);
 }
