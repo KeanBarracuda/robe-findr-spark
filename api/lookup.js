@@ -14,10 +14,11 @@ import {
   json,
 } from "./_shared.js";
 
-export const config = { runtime: "edge" };
-export const runtime = "edge";
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: cors });
+}
 
-export default async function handler(request) {
+export async function POST(request) {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
 
