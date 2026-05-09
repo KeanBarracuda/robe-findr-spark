@@ -71,7 +71,3 @@ export async function POST(request) {
     rap_items: rapData.items,
   });
 }
-
-export default async function handler(request) {
-  return POST(request);
-}
