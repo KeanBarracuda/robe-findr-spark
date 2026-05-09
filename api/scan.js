@@ -127,7 +127,3 @@ export async function POST(request) {
     elapsed_seconds: (Date.now() - start) / 1000,
   });
 }
-
-export default async function handler(request) {
-  return POST(request);
-}
