@@ -15,6 +15,22 @@ import {
   yearIntFromCreated,
 } from "./_shared.js";
 
+function sendJson(res, payload, status = 200) {
+  res.statusCode = status;
+  for (const [key, value] of Object.entries({ "Content-Type": "application/json", ...cors })) {
+    res.setHeader(key, value);
+  }
+  res.end(JSON.stringify(payload));
+}
+
+async function readJsonBody(req) {
+  if (req.body && typeof req.body === "object") return req.body;
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  const raw = Buffer.concat(chunks).toString("utf8");
+  return raw ? JSON.parse(raw) : null;
+}
+
 async function scanOne(uid, req) {
   const user = await getUser(uid);
   if (!user) return null;
@@ -99,29 +115,30 @@ function sortResults(arr, sort) {
   return sorted;
 }
 
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: cors });
-}
-
-export async function POST(request) {
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-  if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
+export default async function handler(req, res) {
+  if (req.method === "OPTIONS") {
+    res.statusCode = 204;
+    for (const [key, value] of Object.entries(cors)) res.setHeader(key, value);
+    res.end();
+    return;
+  }
+  if (req.method !== "POST") return sendJson(res, { error: "Method not allowed" }, 405);
 
   const start = Date.now();
-  const req = await request.json().catch(() => null);
-  if (!req) return json({ error: "Invalid JSON" }, 400);
+  const body = await readJsonBody(req).catch(() => null);
+  if (!body) return sendJson(res, { error: "Invalid JSON" }, 400);
 
-  const year = req.year || "Any year";
-  const batch = Math.max(5, Math.min(req.batch_size ?? 30, 60));
+  const year = body.year || "Any year";
+  const batch = Math.max(5, Math.min(body.batch_size ?? 30, 60));
   const ids = Array.from({ length: batch }, () => pickRandomId(year));
-  const settled = await Promise.allSettled(ids.map((uid) => scanOne(uid, req)));
+  const settled = await Promise.allSettled(ids.map((uid) => scanOne(uid, body)));
   const results = [];
   for (const item of settled) {
     if (item.status === "fulfilled" && item.value) results.push(item.value);
   }
 
-  return json({
-    results: sortResults(results, req.sort),
+  return sendJson(res, {
+    results: sortResults(results, body.sort),
     scanned: ids.length,
     matched: results.length,
     elapsed_seconds: (Date.now() - start) / 1000,
