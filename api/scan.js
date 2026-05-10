@@ -9,7 +9,6 @@ import {
   getUser,
   hasPlaidHat,
   isVerified,
-  json,
   pickRandomId,
   usernameMatchesMethod,
   yearIntFromCreated,
