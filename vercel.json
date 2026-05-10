@@ -1,12 +1,32 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
+  "version": 2,
   "buildCommand": "vite build",
-  "outputDirectory": "dist/client",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "src": "api/lookup.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/scan.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/client"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
