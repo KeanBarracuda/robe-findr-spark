@@ -5,7 +5,7 @@ export default defineConfig({
     spa: {
       enabled: true,
       prerender: {
-        outputPath: "/",
+        outputPath: "/index",
       },
     },
   },
