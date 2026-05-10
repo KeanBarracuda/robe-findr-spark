@@ -4,7 +4,11 @@
   "buildCommand": "vite build",
   "builds": [
     {
-      "src": "api/*.js",
+      "src": "api/lookup.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/scan.js",
       "use": "@vercel/node"
     },
     {
