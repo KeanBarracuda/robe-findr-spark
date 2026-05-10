@@ -11,7 +11,6 @@ import {
   getUserIdByUsername,
   hasPlaidHat,
   isVerified,
-  json,
 } from "./_shared.js";
 
 function sendJson(res, payload, status = 200) {
