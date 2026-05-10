@@ -2,9 +2,9 @@
 Bikin project bisa langsung di-deploy ke Vercel: tinggal upload (atau connect Git), klik Deploy, jadi. Tanpa setting tambahan.
 
 ## Kondisi sekarang
-- Sudah ada `api/lookup.js` dan `api/scan.js` (Vercel Edge Functions, format yang Vercel auto-detect dari folder `/api`).
-- Sudah ada `vercel.json` yang build pakai Vite, output ke `dist/client`, dan rewrite semua URL non-`/api/*` ke `index.html` (SPA fallback).
-- Tapi project juga masih punya **TanStack server routes** (`src/routes/api.lookup.ts`, `src/routes/api.scan.ts`) yang dipakai untuk preview Lovable. File ini tidak jalan di Vercel dan kemungkinan bikin build gagal di Vercel karena butuh runtime TanStack Start (Cloudflare Worker), bukan static SPA.
+- Sudah ada `api/lookup.js` dan `api/scan.js` sebagai Vercel Serverless Functions dari folder `/api`.
+- `vercel.json` harus memakai config modern (`framework`, `buildCommand`, `outputDirectory`, `rewrites`), bukan legacy `builds/routes`.
+- Penyebab 404 dari log Vercel: build sukses, tapi output client tidak menampilkan `dist/client/index.html`; `vite.config.ts` sebelumnya memakai `spa.prerender.outputPath: "/"`, yang TanStack tulis sebagai shell `/.html`, bukan `/index.html`.
 
 ## Rencana perubahan
 
@@ -18,18 +18,19 @@ Frontend di-build sebagai SPA murni. Semua call ke `/api/lookup` dan `/api/scan`
 Frontend (`Scanner.tsx`, `Lookup.tsx`) tetap fetch ke `/api/lookup` dan `/api/scan` — di Vercel itu di-handle file `api/*.js`, di preview Lovable tetap jalan via Cloudflare Worker (kalau perlu kita bikin ulang, tapi prioritas user = Vercel).
 
 ### 3. Pastikan `vite.config.ts` bisa build SPA tanpa server entry
-Config sekarang pakai `@lovable.dev/vite-tanstack-config` dengan `spa.enabled = true` — output `dist/client` sudah bisa langsung di-host. Tidak perlu diubah.
+Config pakai `@lovable.dev/vite-tanstack-config` dengan `spa.enabled = true` dan `spa.prerender.outputPath = "/index"`, supaya hasil prerender menjadi `dist/client/index.html`.
 
 ### 4. Pastikan `vercel.json` bener
-Sudah bener:
+Config final:
 ```json
 {
-  "buildCommand": "vite build",
+  "framework": "vite",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist/client",
-  "rewrites": [{ "source": "/((?!api/.*).*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
 }
 ```
-Vercel auto-detect `api/*.js` sebagai Edge Functions (sudah ada `export const config = { runtime: "edge" }` di tiap file).
+Vercel auto-detect `api/*.js` sebagai functions selama tidak dipaksa oleh legacy `builds/routes`.
 
 ### 5. Verifikasi
 Build lokal lalu cek `dist/client/index.html` ada, dan folder `api/` punya `lookup.js` + `scan.js` + `_shared.js`.
