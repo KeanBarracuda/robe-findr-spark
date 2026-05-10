@@ -14,23 +14,40 @@ import {
   json,
 } from "./_shared.js";
 
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: cors });
+function sendJson(res, payload, status = 200) {
+  res.statusCode = status;
+  for (const [key, value] of Object.entries({ "Content-Type": "application/json", ...cors })) {
+    res.setHeader(key, value);
+  }
+  res.end(JSON.stringify(payload));
 }
 
-export async function POST(request) {
-  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-  if (request.method !== "POST") return json({ ok: false, error: "Method not allowed" }, 405);
+async function readJsonBody(req) {
+  if (req.body && typeof req.body === "object") return req.body;
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  const raw = Buffer.concat(chunks).toString("utf8");
+  return raw ? JSON.parse(raw) : {};
+}
 
-  const body = await request.json().catch(() => ({}));
+export default async function handler(req, res) {
+  if (req.method === "OPTIONS") {
+    res.statusCode = 204;
+    for (const [key, value] of Object.entries(cors)) res.setHeader(key, value);
+    res.end();
+    return;
+  }
+  if (req.method !== "POST") return sendJson(res, { ok: false, error: "Method not allowed" }, 405);
+
+  const body = await readJsonBody(req).catch(() => ({}));
   const username = String(body.username || "").trim();
-  if (!username || username.length > 50) return json({ ok: false, error: "Invalid username" }, 400);
+  if (!username || username.length > 50) return sendJson(res, { ok: false, error: "Invalid username" }, 400);
 
   const uid = await getUserIdByUsername(username);
-  if (!uid) return json({ ok: false, error: "User not found" }, 404);
+  if (!uid) return sendJson(res, { ok: false, error: "User not found" }, 404);
 
   const user = await getUser(uid);
-  if (!user) return json({ ok: false, error: "Failed to fetch user info" }, 502);
+  if (!user) return sendJson(res, { ok: false, error: "Failed to fetch user info" }, 502);
 
   const [verified, isR15, plaid, rapData, badges, hats, avatar] = await Promise.all([
     isVerified(uid),
@@ -55,7 +72,7 @@ export async function POST(request) {
     defaultActiveOnNoSignals: true,
   });
 
-  return json({
+  return sendJson(res, {
     ok: true,
     user_id: uid,
     username: user.name,
