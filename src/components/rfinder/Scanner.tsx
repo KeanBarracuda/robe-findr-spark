@@ -27,7 +27,7 @@ const YEAR_KEYS = Object.keys(YEAR_ID_RANGES);
 export function Scanner() {
   const [year, setYear] = useState("Any year");
   const [method, setMethod] = useState("random");
-  const [batchSize, setBatchSize] = useState(30);
+  const [batchSize, setBatchSize] = useState(60);
   const [rapKey, setRapKey] = useState("Off");
   const [hatKey, setHatKey] = useState("Off");
   const [banFilter, setBanFilter] = useState("All");
