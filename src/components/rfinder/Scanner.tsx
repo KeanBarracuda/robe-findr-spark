@@ -90,17 +90,15 @@ export function Scanner() {
     setResults([]);
     const start = Date.now();
 
-    // Boost scan rate by firing several batches in parallel per tick.
-    // "nonstop" keeps going until Stop; other methods run until at least
-    // `minAccounts` results are found, capped to avoid infinite loops.
+    // Hard cap: 60 per request × 6 parallel = 360 IDs scanned, then stop.
+    // Nonstop ignores the cap and keeps scanning until the user clicks Stop.
     const PARALLEL = 6;
+    const SCAN_CAP = 360;
     const target = Math.max(1, Math.min(minAccounts, 6));
-    const maxTicks = method === "nonstop" ? Infinity : 20;
-    let tick = 0;
     let total = 0;
+    let totalScanned = 0;
 
-    while (!stopFlag.stop && tick < maxTicks) {
-      tick++;
+    while (!stopFlag.stop) {
       const batches = await Promise.all(
         Array.from({ length: PARALLEL }, () => runOneBatch()),
       );
@@ -110,6 +108,7 @@ export function Scanner() {
 
       const scannedAdd = ok.reduce((n, b) => n + b.scanned, 0);
       const newResults = ok.flatMap((b) => b.results);
+      totalScanned += scannedAdd;
       setScanned((s) => s + scannedAdd);
       setResults((prev) => {
         const merged = [...prev, ...newResults];
@@ -124,7 +123,10 @@ export function Scanner() {
         return unique;
       });
       setElapsed((Date.now() - start) / 1000);
-      if (method !== "nonstop" && total >= target) break;
+
+      if (method === "nonstop") continue;
+      if (total >= target) break;
+      if (totalScanned >= SCAN_CAP) break;
     }
     setRunning(false);
   }
@@ -178,11 +180,11 @@ export function Scanner() {
           <NumberInput
             value={batchSize}
             min={10}
-            max={150}
+            max={60}
             onChange={(v) => setBatchSize(v)}
           />
           <p className="text-[11px] text-muted-foreground mt-1">
-            6 batches fire in parallel per tick for max scan rate.
+            6 batches in parallel. Hard cap: 360 IDs scanned per Start.
           </p>
         </Field>
 
