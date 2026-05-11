@@ -368,7 +368,10 @@ export function usernameMatchesMethod(username, method) {
 
 export function pickRandomId(year) {
   const range = YEAR_ID_RANGES[year] ?? YEAR_ID_RANGES["Any year"];
-  const [lo, hi] = range;
+  // "Year and below": when a specific year is chosen, search from the very
+  // first Roblox ID up to the upper bound of that year.
+  const lo = year && year !== "Any year" ? 1 : range[0];
+  const hi = range[1];
   return Math.floor(Math.random() * (hi - lo + 1)) + lo;
 }
 

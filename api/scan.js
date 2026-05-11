@@ -128,7 +128,7 @@ export default async function handler(req, res) {
   if (!body) return sendJson(res, { error: "Invalid JSON" }, 400);
 
   const year = body.year || "Any year";
-  const batch = Math.max(5, Math.min(body.batch_size ?? 30, 60));
+  const batch = Math.max(5, Math.min(body.batch_size ?? 60, 150));
   const ids = Array.from({ length: batch }, () => pickRandomId(year));
   const settled = await Promise.allSettled(ids.map((uid) => scanOne(uid, body)));
   const results = [];

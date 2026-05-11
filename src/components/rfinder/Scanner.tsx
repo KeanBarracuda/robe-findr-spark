@@ -27,7 +27,7 @@ const YEAR_KEYS = Object.keys(YEAR_ID_RANGES);
 export function Scanner() {
   const [year, setYear] = useState("Any year");
   const [method, setMethod] = useState("random");
-  const [batchSize, setBatchSize] = useState(30);
+  const [batchSize, setBatchSize] = useState(60);
   const [rapKey, setRapKey] = useState("Off");
   const [hatKey, setHatKey] = useState("Off");
   const [banFilter, setBanFilter] = useState("All");
@@ -89,16 +89,27 @@ export function Scanner() {
     setResults([]);
     const start = Date.now();
 
-    // Loop continuously until the user clicks Stop. Strict filter combos
-    // (RAP min, badges, year, etc.) can require many batches to find a match,
-    // so we keep scanning instead of giving up after a fixed batch count.
-    while (!stopFlag.stop) {
-      const data = await runOneBatch();
-      if (!data) break;
-      setScanned((s) => s + data.scanned);
+    // Boost scan rate by firing several batches in parallel per tick.
+    // "nonstop" keeps going until Stop; other methods run a bounded number
+    // of ticks so it doesn't loop forever.
+    const PARALLEL = 6;
+    const maxTicks = method === "nonstop" ? Infinity : 4;
+    let tick = 0;
+
+    while (!stopFlag.stop && tick < maxTicks) {
+      tick++;
+      const batches = await Promise.all(
+        Array.from({ length: PARALLEL }, () => runOneBatch()),
+      );
+      if (stopFlag.stop) break;
+      const ok = batches.filter((b): b is ScanResponse => !!b);
+      if (!ok.length) break;
+
+      const scannedAdd = ok.reduce((n, b) => n + b.scanned, 0);
+      const newResults = ok.flatMap((b) => b.results);
+      setScanned((s) => s + scannedAdd);
       setResults((prev) => {
-        const merged = [...prev, ...data.results];
-        // Dedupe by user_id
+        const merged = [...prev, ...newResults];
         const seen = new Set<number>();
         const unique = merged.filter((r) => {
           if (seen.has(r.user_id)) return false;
@@ -109,8 +120,6 @@ export function Scanner() {
         return unique;
       });
       setElapsed((Date.now() - start) / 1000);
-      // small breather between batches
-      await new Promise((r) => setTimeout(r, 200));
     }
     setRunning(false);
   }
@@ -164,11 +173,11 @@ export function Scanner() {
           <NumberInput
             value={batchSize}
             min={10}
-            max={60}
+            max={150}
             onChange={(v) => setBatchSize(v)}
           />
           <p className="text-[11px] text-muted-foreground mt-1">
-            Capped at 60 per request on edge runtime. Click Start to loop.
+            6 batches fire in parallel per tick for max scan rate.
           </p>
         </Field>
 
