@@ -35,6 +35,7 @@ export function Scanner() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [requiredBadges, setRequiredBadges] = useState<string[]>([]);
   const [sort, setSort] = useState("None");
+  const [minAccounts, setMinAccounts] = useState(1);
 
   const [running, setRunning] = useState(false);
   const stopFlag = useState(() => ({ stop: false }))[0];
@@ -90,11 +91,13 @@ export function Scanner() {
     const start = Date.now();
 
     // Boost scan rate by firing several batches in parallel per tick.
-    // "nonstop" keeps going until Stop; other methods run a bounded number
-    // of ticks so it doesn't loop forever.
+    // "nonstop" keeps going until Stop; other methods run until at least
+    // `minAccounts` results are found, capped to avoid infinite loops.
     const PARALLEL = 6;
-    const maxTicks = method === "nonstop" ? Infinity : 4;
+    const target = Math.max(1, Math.min(minAccounts, 6));
+    const maxTicks = method === "nonstop" ? Infinity : 20;
     let tick = 0;
+    let total = 0;
 
     while (!stopFlag.stop && tick < maxTicks) {
       tick++;
@@ -116,10 +119,12 @@ export function Scanner() {
           seen.add(r.user_id);
           return true;
         });
-        setMatched(unique.length);
+        total = unique.length;
+        setMatched(total);
         return unique;
       });
       setElapsed((Date.now() - start) / 1000);
+      if (method !== "nonstop" && total >= target) break;
     }
     setRunning(false);
   }
@@ -178,6 +183,18 @@ export function Scanner() {
           />
           <p className="text-[11px] text-muted-foreground mt-1">
             6 batches fire in parallel per tick for max scan rate.
+          </p>
+        </Field>
+
+        <Field label="Minimum accounts (max 6)">
+          <NumberInput
+            value={minAccounts}
+            min={1}
+            max={6}
+            onChange={(v) => setMinAccounts(v)}
+          />
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Stops once at least this many matches are found.
           </p>
         </Field>
 
