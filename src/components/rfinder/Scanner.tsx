@@ -186,6 +186,18 @@ export function Scanner() {
           </p>
         </Field>
 
+        <Field label="Minimum accounts (max 6)">
+          <NumberInput
+            value={minAccounts}
+            min={1}
+            max={6}
+            onChange={(v) => setMinAccounts(v)}
+          />
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Stops once at least this many matches are found.
+          </p>
+        </Field>
+
         <div className="grid grid-cols-2 gap-3">
           <Field label="RAP min">
             <Select value={rapKey} onChange={(e) => setRapKey(e.target.value)}>
