@@ -89,12 +89,10 @@ export function Scanner() {
     setResults([]);
     const start = Date.now();
 
-    // For "nonstop" loop forever until stopped; for other methods, run a few batches then stop.
-    const maxBatches = method === "nonstop" ? Infinity : 6;
-    let batches = 0;
-
-    while (!stopFlag.stop && batches < maxBatches) {
-      batches++;
+    // Loop continuously until the user clicks Stop. Strict filter combos
+    // (RAP min, badges, year, etc.) can require many batches to find a match,
+    // so we keep scanning instead of giving up after a fixed batch count.
+    while (!stopFlag.stop) {
       const data = await runOneBatch();
       if (!data) break;
       setScanned((s) => s + data.scanned);
@@ -135,7 +133,7 @@ export function Scanner() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `rfinder_results_${Date.now()}.json`;
+    a.download = `barracudafinder_result_id_${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
