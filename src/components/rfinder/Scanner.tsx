@@ -35,6 +35,7 @@ export function Scanner() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [requiredBadges, setRequiredBadges] = useState<string[]>([]);
   const [sort, setSort] = useState("None");
+  const [minAccounts, setMinAccounts] = useState(1);
 
   const [running, setRunning] = useState(false);
   const stopFlag = useState(() => ({ stop: false }))[0];
